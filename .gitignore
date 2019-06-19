@@ -1,0 +1,23 @@
+# Files
+*.pkl
+*.pdf
+*.png
+*.json
+
+# Folder
+data/
+.vscode/
+__pycache__/
+
+
+*.swp
+*~
+*.DS_Store
+
+*.pyc
+*.pdf
+*.png
+*py~
+
+*.pth
+.remote-sync.json
