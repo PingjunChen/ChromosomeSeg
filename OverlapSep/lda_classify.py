@@ -142,8 +142,8 @@ def lda_pred(fea, project_mat, class_mean):
 
 
 if __name__ == "__main__":
-	train_fea_path = "./data/OverlapSep/chromosome_train_feas.json"
-	test_fea_path = "./data/OverlapSep/chromosome_test_feas.json"
+	train_fea_path = "../data/OverlapSep/chromosome_train_feas.json"
+	test_fea_path = "../data/OverlapSep/chromosome_test_feas.json"
 
 	# Both train_feas and test_feas are dictionary with 24 keys, '1', '2',...,'X','Y'
 	# For each key, there are a list of feature descriptor for chromosome
@@ -158,13 +158,13 @@ if __name__ == "__main__":
 	# trainData, testData = data_normalize(trainData, testData)
 	project_mat, class_mean= LDA(trainData, trainLabel) # A is the projection matrix
 
-	# # save lda model
-	# lda_model_dict = {
-	# 	'ProjectMat': project_mat,
-	# 	'ClassMean': class_mean}
-	#
-	# with open('lda_model.pkl', "wb") as handle:
-	# 	pickle.dump(lda_model_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+	# save lda model
+	lda_model_dict = {
+		'ProjectMat': project_mat,
+		'ClassMean': class_mean}
+
+	with open('lda_model.pkl', "wb") as handle:
+		pickle.dump(lda_model_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 	# # sample-by-sample prediction
 	# correct_num, total_num = 0, testData.shape[0]
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
 	# prediction and
 	dist, lda_accuracy, CM = Classify(testData, testLabel, project_mat, class_mean)   # dist is with the size test number * class_num
-	print("The lda accuracy is:{}".format(lda_accuracy))
+	print("The lda accuracy is: {:.3f}".format(lda_accuracy))
 
 	# plt.imshow(CM, interpolation='nearest', cmap=plt.cm.Blues)
 	# plt.title("Chromosome Contour Prediction Confusion Matrix")
