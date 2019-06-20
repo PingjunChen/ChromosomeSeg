@@ -18,7 +18,7 @@ from utils import mask2color, calc_loss
 from utils import refine_pred
 from utils import assign_combine
 from utils import ZernikeMoments, cal_assignment_fea
-from models import UNet
+from segnet import UNet, pspnet
 
 
 def set_args():

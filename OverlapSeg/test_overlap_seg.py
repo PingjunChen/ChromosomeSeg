@@ -12,7 +12,8 @@ import torch.backends.cudnn as cudnn
 cudnn.benchmark = True
 
 from collections import defaultdict
-from models import UNet
+from segnet import UNet, pspnet
+
 from torch.utils.data import DataLoader
 from utils import calc_loss, print_metrics
 from chromosome_dataset import ChromosomeDataset
@@ -61,7 +62,15 @@ if  __name__ == '__main__':
     args = set_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     # create model
-    model = UNet(n_class=args.class_num)
+    model = None
+    if args.network == "UNet":
+        model = UNet(n_class=args.class_num)
+    elif args.model_name == "PSP":
+        model = pspnet.PSPNet(n_classes=19, input_size=(160, 160))
+        model.load_pretrained_model(model_path="./segnet/pspnet/pspnet101_cityscapes.caffemodel")
+        model.classification = nn.Conv2d(512, args.class_num, kernel_size=1)
+    else:
+        raise Exception("Unknow network: {}".format(args.network))
     model_path = os.path.join(args.model_dir, args.network, args.session, args.model_name)
     model.load_state_dict(torch.load(model_path))
     model.cuda()
