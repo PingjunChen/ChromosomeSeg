@@ -5,6 +5,7 @@ import numpy as np
 import argparse
 import time, copy
 import torch
+import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from torchvision import transforms
@@ -25,10 +26,10 @@ def set_args():
     parser.add_argument("--class_num",       type=int,   default=2)
     parser.add_argument("--data_dir",        type=str,   default="../data/OverlapSeg")
     parser.add_argument("--model_dir",       type=str,   default="../data/Models/SegModels")
-    parser.add_argument("--session",         type=str,   default="s4")
+    parser.add_argument("--session",         type=str,   default="s6")
     parser.add_argument("--network",         type=str,   default="UNet")
-    parser.add_argument("--model_name",      type=str,   default="unet-0.1283.pth")
-    parser.add_argument("--gpu",             type=str,   default="6",     help="gpu id")
+    parser.add_argument("--model_name",      type=str,   default="unet-0.1302.pth")
+    parser.add_argument("--gpu",             type=str,   default="7",     help="gpu id")
     args = parser.parse_args()
     return args
 
@@ -65,7 +66,7 @@ if  __name__ == '__main__':
     model = None
     if args.network == "UNet":
         model = UNet(n_class=args.class_num)
-    elif args.model_name == "PSP":
+    elif args.network == "PSP":
         model = pspnet.PSPNet(n_classes=19, input_size=(160, 160))
         model.load_pretrained_model(model_path="./segnet/pspnet/pspnet101_cityscapes.caffemodel")
         model.classification = nn.Conv2d(512, args.class_num, kernel_size=1)

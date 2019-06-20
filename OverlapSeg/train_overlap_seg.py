@@ -5,6 +5,7 @@ import numpy as np
 import argparse
 import time, copy
 import torch
+import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from torchvision import transforms
@@ -21,7 +22,7 @@ from chromosome_dataset import ChromosomeDataset
 def set_args():
     parser = argparse.ArgumentParser(description = 'Chromosome Overlap Segmentation')
     parser.add_argument("--batch_size",      type=int,   default=8,       help="batch size")
-    parser.add_argument("--lr",              type=float, default=1.0e-4,  help="learning rate (default: 0.0001)")
+    parser.add_argument("--lr",              type=float, default=1.0e-3,  help="learning rate (default: 0.0001)")
     parser.add_argument("--maxepoch",        type=int,   default=32,      help="number of epochs to train")
     parser.add_argument("--decay_epoch",     type=int,   default=10,      help="lr start to decay linearly from decay_epoch")
     parser.add_argument("--display_freq",    type=int,   default=50,      help="plot the results every {} batches")
@@ -29,9 +30,9 @@ def set_args():
     parser.add_argument("--class_num",       type=int,   default=2)
     parser.add_argument("--data_dir",        type=str,   default="../data/OverlapSeg")
     parser.add_argument("--model_dir",       type=str,   default="../data/Models")
-    parser.add_argument("--network",         type=str,   default="UNet")
-    parser.add_argument("--gpu",             type=str,   default="7",     help="gpu id")
-    parser.add_argument("--session",         type=str,   default="s9",     help="training session")
+    parser.add_argument("--network",         type=str,   default="PSP")
+    parser.add_argument("--gpu",             type=str,   default="3",     help="gpu id")
+    parser.add_argument("--session",         type=str,   default="s5",     help="training session")
     parser.add_argument("--seed",            type=int,   default=1234,    help="training seed")
 
     args = parser.parse_args()
@@ -45,6 +46,7 @@ def gen_dataloader(args):
     ])
 
     train_dset = ChromosomeDataset(os.path.join(args.data_dir, args.session+"_train_imgs"), transform = trans)
+    # train_dset = ChromosomeDataset(os.path.join(args.data_dir, "real_train_imgs"), transform = trans)
     val_dset = ChromosomeDataset(os.path.join(args.data_dir, "val_imgs"), transform = trans)
 
     dataloaders = {
@@ -115,7 +117,7 @@ def train_model(model, args):
     best_model_dir =  os.path.join(args.model_dir, "SegModels", args.network, args.session)
     if not os.path.exists(best_model_dir):
         os.makedirs(best_model_dir)
-    best_model_name = "unet-" + str(best_loss_str) + ".pth"
+    best_model_name = args.network.lower() + "-" + str(best_loss_str) + ".pth"
     best_model_path = os.path.join(best_model_dir, best_model_name)
     torch.save(best_model, best_model_path)
 
@@ -128,7 +130,7 @@ if  __name__ == '__main__':
     model = None
     if args.network == "UNet":
         model = UNet(n_class=args.class_num)
-    elif args.model_name == "PSP":
+    elif args.network == "PSP":
         model = pspnet.PSPNet(n_classes=19, input_size=(160, 160))
         model.load_pretrained_model(model_path="./segnet/pspnet/pspnet101_cityscapes.caffemodel")
         model.classification = nn.Conv2d(512, args.class_num, kernel_size=1)
