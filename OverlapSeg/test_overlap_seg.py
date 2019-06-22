@@ -25,19 +25,19 @@ def set_args():
     parser.add_argument("--batch_size",      type=int,   default=8,       help="batch size")
     parser.add_argument("--class_num",       type=int,   default=2)
     parser.add_argument("--data_dir",        type=str,   default="../data/OverlapSeg")
+    parser.add_argument("--simu_type",       type=str,   default="Fusion")
     parser.add_argument("--model_dir",       type=str,   default="../data/Models/SegModels")
     parser.add_argument("--session",         type=str,   default="s6")
     parser.add_argument("--network",         type=str,   default="UNet")
-    parser.add_argument("--model_name",      type=str,   default="unet-0.1302.pth")
-    parser.add_argument("--gpu",             type=str,   default="7",     help="gpu id")
+    parser.add_argument("--model_name",      type=str,   default="unet-0.1133.pth")
+    parser.add_argument("--gpu",             type=str,   default="3",     help="gpu id")
     args = parser.parse_args()
     return args
 
 
-
 def test_seg_model(model, args):
     # prepare dataset
-    test_dset = ChromosomeDataset(os.path.join(args.data_dir, "test_imgs"),
+    test_dset = ChromosomeDataset(os.path.join(args.data_dir+args.simu_type, "test_imgs"),
                                   transform = transforms.Compose([transforms.ToTensor(),]))
     test_dataloader = DataLoader(test_dset, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
@@ -58,7 +58,6 @@ def test_seg_model(model, args):
     print_metrics(metrics, epoch_samples, "test")
 
 
-
 if  __name__ == '__main__':
     args = set_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
@@ -72,7 +71,7 @@ if  __name__ == '__main__':
         model.classification = nn.Conv2d(512, args.class_num, kernel_size=1)
     else:
         raise Exception("Unknow network: {}".format(args.network))
-    model_path = os.path.join(args.model_dir, args.network, args.session, args.model_name)
+    model_path = os.path.join(args.model_dir, args.simu_type+args.network, args.session, args.model_name)
     model.load_state_dict(torch.load(model_path))
     model.cuda()
 

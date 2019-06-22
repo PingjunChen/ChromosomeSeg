@@ -22,7 +22,7 @@ from chromosome_dataset import ChromosomeDataset
 def set_args():
     parser = argparse.ArgumentParser(description = 'Chromosome Overlap Segmentation')
     parser.add_argument("--batch_size",      type=int,   default=8,       help="batch size")
-    parser.add_argument("--lr",              type=float, default=1.0e-3,  help="learning rate (default: 0.0001)")
+    parser.add_argument("--lr",              type=float, default=1.0e-4,  help="learning rate (default: 0.0001)")
     parser.add_argument("--maxepoch",        type=int,   default=32,      help="number of epochs to train")
     parser.add_argument("--decay_epoch",     type=int,   default=10,      help="lr start to decay linearly from decay_epoch")
     parser.add_argument("--display_freq",    type=int,   default=50,      help="plot the results every {} batches")
@@ -30,14 +30,14 @@ def set_args():
     parser.add_argument("--class_num",       type=int,   default=2)
     parser.add_argument("--data_dir",        type=str,   default="../data/OverlapSeg")
     parser.add_argument("--model_dir",       type=str,   default="../data/Models")
+    parser.add_argument("--simu_type",       type=str,   default="Fusion")
     parser.add_argument("--network",         type=str,   default="PSP")
-    parser.add_argument("--gpu",             type=str,   default="3",     help="gpu id")
-    parser.add_argument("--session",         type=str,   default="s5",     help="training session")
+    parser.add_argument("--gpu",             type=str,   default="7",     help="gpu id")
+    parser.add_argument("--session",         type=str,   default="s2",    help="training session")
     parser.add_argument("--seed",            type=int,   default=1234,    help="training seed")
 
     args = parser.parse_args()
     return args
-
 
 
 def gen_dataloader(args):
@@ -45,9 +45,8 @@ def gen_dataloader(args):
         transforms.ToTensor(),
     ])
 
-    train_dset = ChromosomeDataset(os.path.join(args.data_dir, args.session+"_train_imgs"), transform = trans)
-    # train_dset = ChromosomeDataset(os.path.join(args.data_dir, "real_train_imgs"), transform = trans)
-    val_dset = ChromosomeDataset(os.path.join(args.data_dir, "val_imgs"), transform = trans)
+    train_dset = ChromosomeDataset(os.path.join(args.data_dir+args.simu_type, args.session+"_train_imgs"), transform = trans)
+    val_dset = ChromosomeDataset(os.path.join(args.data_dir+args.simu_type, "val_imgs"), transform = trans)
 
     dataloaders = {
         'train': DataLoader(train_dset, batch_size=args.batch_size, shuffle=True, num_workers=4),
@@ -114,7 +113,7 @@ def train_model(model, args):
     best_loss_str = '{:.4f}'.format(best_loss)
     print('Best val loss: ' + best_loss_str)
     # Save best model
-    best_model_dir =  os.path.join(args.model_dir, "SegModels", args.network, args.session)
+    best_model_dir =  os.path.join(args.model_dir, "SegModels", args.simu_type+args.network, args.session)
     if not os.path.exists(best_model_dir):
         os.makedirs(best_model_dir)
     best_model_name = args.network.lower() + "-" + str(best_loss_str) + ".pth"

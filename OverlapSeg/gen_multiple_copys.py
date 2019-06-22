@@ -23,6 +23,6 @@ def gen_multiple_copy(img_dir, save_dir, copy):
             shutil.copyfile(os.path.join(img_dir, ori_mask_name), os.path.join(save_dir, new_mask_name))
 
 if __name__ == "__main__":
-    train_img_dir = "../data/OverlapSeg/real_train_imgs"
-    save_img_dir = "../data/OverlapSeg/train_imgs"
+    train_img_dir = "../data/OverlapSegFusion/r_train_imgs"
+    save_img_dir = "../data/OverlapSegFusion/train_imgs"
     gen_multiple_copy(train_img_dir, save_img_dir, copy=9)
