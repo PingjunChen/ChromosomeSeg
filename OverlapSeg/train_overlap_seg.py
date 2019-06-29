@@ -32,8 +32,8 @@ def set_args():
     parser.add_argument("--model_dir",       type=str,   default="../data/Models")
     parser.add_argument("--simu_type",       type=str,   default="Fusion")
     parser.add_argument("--network",         type=str,   default="PSP")
-    parser.add_argument("--gpu",             type=str,   default="7",     help="gpu id")
-    parser.add_argument("--session",         type=str,   default="s2",    help="training session")
+    parser.add_argument("--gpu",             type=str,   default="3",     help="gpu id")
+    parser.add_argument("--session",         type=str,   default="r",    help="training session")
     parser.add_argument("--seed",            type=int,   default=1234,    help="training seed")
 
     args = parser.parse_args()

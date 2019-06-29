@@ -27,10 +27,10 @@ def set_args():
     parser.add_argument("--data_dir",        type=str,   default="../data/OverlapSeg")
     parser.add_argument("--simu_type",       type=str,   default="Fusion")
     parser.add_argument("--model_dir",       type=str,   default="../data/Models/SegModels")
-    parser.add_argument("--session",         type=str,   default="s6")
-    parser.add_argument("--network",         type=str,   default="UNet")
-    parser.add_argument("--model_name",      type=str,   default="unet-0.1133.pth")
-    parser.add_argument("--gpu",             type=str,   default="3",     help="gpu id")
+    parser.add_argument("--session",         type=str,   default="r")
+    parser.add_argument("--network",         type=str,   default="PSP")
+    parser.add_argument("--model_name",      type=str,   default="psp-0.4626.pth")
+    parser.add_argument("--gpu",             type=str,   default="4",     help="gpu id")
     args = parser.parse_args()
     return args
 
@@ -71,6 +71,7 @@ if  __name__ == '__main__':
         model.classification = nn.Conv2d(512, args.class_num, kernel_size=1)
     else:
         raise Exception("Unknow network: {}".format(args.network))
+    print("Net: {} session: {} model name: {}".format(args.network, args.session, args.model_name))
     model_path = os.path.join(args.model_dir, args.simu_type+args.network, args.session, args.model_name)
     model.load_state_dict(torch.load(model_path))
     model.cuda()
