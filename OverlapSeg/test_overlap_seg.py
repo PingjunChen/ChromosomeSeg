@@ -64,7 +64,7 @@ if  __name__ == '__main__':
     # create model
     model = None
     if args.network == "UNet":
-        model = UNet(n_class=args.class_num)
+
     elif args.network == "PSP":
         model = pspnet.PSPNet(n_classes=19, input_size=(160, 160))
         model.load_pretrained_model(model_path="./segnet/pspnet/pspnet101_cityscapes.caffemodel")

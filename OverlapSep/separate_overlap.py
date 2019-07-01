@@ -12,24 +12,21 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from collections import defaultdict
 
-
 from chromosome_dataset import ChromosomeDataset
 from utils import mask2color, calc_loss
 from utils import refine_pred
 from utils import assign_combine
 from utils import ZernikeMoments, cal_assignment_fea
-from models import UNet
-
+from segnet import UNet
 
 def set_args():
     parser = argparse.ArgumentParser(description = 'Chromosome Overlap Segmentation')
     parser.add_argument("--batch_size",      type=int,   default=1,       help="batch size")
     parser.add_argument("--class_num",       type=int,   default=2,       help="number of category")
     parser.add_argument("--data_dir",        type=str,   default="../data")
-    parser.add_argument("--model_name",      type=str,   default="unet-0.611.pth")
+    parser.add_argument("--model_name",      type=str,   default="unet-0.1283.pth")
     parser.add_argument("--lda_model_path",  type=str,   default="lda_model.pkl")
     parser.add_argument("--gpu",             type=str,   default="2",     help="gpu id")
-    parser.add_argument("--session",         type=str,   default="9",     help="training session")
     parser.add_argument("--seed",            type=int,   default=1234,    help="seed")
 
     args = parser.parse_args()
@@ -72,15 +69,15 @@ def test_model(model, dloader, save_pic=True):
     metrics = defaultdict(float)
     for ind, (inputs, labels) in enumerate(dloader):
         filename = os.path.splitext(dloader.dataset.cur_img_name)[0]
-        save_path = os.path.join(args.data_dir, "Predictions", args.session, filename+".png")
+        save_path = os.path.join(args.data_dir, "Predictions", filename+".png")
 
         img_ori = inputs[0].cpu().numpy().transpose((1, 2, 0))
         mask = labels[0].cpu().numpy().transpose((1, 2, 0))
         mask = (mask[...,0] * 1 + mask[...,1] * 255).astype(np.uint8)
         mask_c = mask2color(mask)
 
-        inputs = inputs.to(device)
-        labels = labels.to(device)
+        inputs = inputs.cuda()
+        labels = labels.cuda()
         outputs = model(inputs)
         loss = calc_loss(outputs, labels, metrics)
 
@@ -175,11 +172,13 @@ def test_model(model, dloader, save_pic=True):
 
 
 if  __name__ == '__main__':
+    args = set_args()
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     # load model
     model = UNet(n_class=args.class_num)
-    model_path = os.path.join(args.data_dir, "Models/SegModels", args.model_name)
+    model_path = os.path.join(args.data_dir, "Models/SegModels/AddUNet/s4", args.model_name)
     model.load_state_dict(torch.load(model_path))
-    model.to(device)
+    model.cuda()
     model.eval()
     # prepare dataset
     dloader = gen_test_dataloader()
