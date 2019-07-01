@@ -52,11 +52,12 @@ def gen_test_dataloader():
     return test_dloader
 
 
-def test_model(model, dloader, save_pic=True):
+def test_model(model, dloader, save_pic=False):
     start_time = time.time()
+    print("Start separating")
 
     desc = ZernikeMoments(radius=21)
-    lda_paras = pickle.load(open(args.lda_model_path, "rb"))
+    lda_paras = pickle.load(open(os.path.join("../data/Models/LDA", args.lda_model_path), "rb"))
     def lda_pred(fea):
         testVector = np.matmul(fea, lda_paras['ProjectMat'])
         class_num = lda_paras['ClassMean'].shape[0]
@@ -100,75 +101,58 @@ def test_model(model, dloader, save_pic=True):
         combine = refine_pred(single, overlap)
         pred_c = mask2color(combine)
 
-        # group_num = len(np.unique(measure.label(combine > 0))) - 1
-        # if group_num > 1:
-        #     continue
-        # region_num = len(np.unique(combine)) - 1
-        # if region_num < 3 or region_num > 5:
-        #     continue
-        # assignments = assign_combine(combine)
-        # if len(assignments) == 0:
-        #     continue
-        #
-        # min_dists = []
-        # for assignment in assignments:
-        #     fea1, fea2 = cal_assignment_fea(assignment, desc)
-        #     _, min_dist1 = lda_pred(fea1)
-        #     _, min_dist2 = lda_pred(fea2)
-        #     min_dists.append(min_dist1+min_dist2)
-        # best_assign_ind = np.argmin(min_dists)
-        # best_assign = assignments[best_assign_ind]
-        #
-        # final_img = np.copy(img_ori)
-        # final_img = np.ascontiguousarray(final_img * 255, dtype=np.uint8)
-        # cv2.drawContours(final_img, best_assign, 0, [255, 0, 0], 2)
-        # cv2.drawContours(final_img, best_assign, 1, [0, 255, 0], 2)
+        group_num = len(np.unique(measure.label(combine > 0))) - 1
+        if group_num > 1:
+            continue
+        region_num = len(np.unique(combine)) - 1
+        if region_num < 3 or region_num > 5:
+            continue
+        assignments = assign_combine(combine)
+        if len(assignments) == 0:
+            continue
 
+        min_dists = []
+        for assignment in assignments:
+            fea1, fea2 = cal_assignment_fea(assignment, desc)
+            _, min_dist1 = lda_pred(fea1)
+            _, min_dist2 = lda_pred(fea2)
+            min_dists.append(min_dist1+min_dist2)
+        best_assign_ind = np.argmin(min_dists)
+        best_assign = assignments[best_assign_ind]
 
-        # cur_cnt = best_assign[1]
-        # cnt_min_w, cnt_min_h = np.min(cur_cnt[:, 0, 0]), np.min(cur_cnt[:, 0, 1])
-        # cnt_max_w, cnt_max_h = np.max(cur_cnt[:, 0, 0]), np.max(cur_cnt[:, 0, 1])
-        # sub_img = img_ori[cnt_min_h:cnt_max_h+1, cnt_min_w:cnt_max_w+1]
-        # cnt_mask = np.zeros_like(sub_img, dtype=np.uint8)
-        # shift_cnt = cur_cnt.copy()
-        # shift_cnt[:, 0, 0] -= cnt_min_w
-        # shift_cnt[:, 0, 1] -= cnt_min_h
-        # cnt_mask = np.ascontiguousarray(cnt_mask)
-        # cv2.drawContours(cnt_mask, [shift_cnt], 0, [1, 1, 1], -1)
-        # mask_sub_img = sub_img * cnt_mask
-        # import pdb; pdb.set_trace()
-
+        final_img = np.copy(img_ori)
+        final_img = np.ascontiguousarray(final_img * 255, dtype=np.uint8)
+        cv2.drawContours(final_img, best_assign, 0, [255, 0, 0], 2)
+        cv2.drawContours(final_img, best_assign, 1, [0, 255, 0], 2)
+        io.imsave(save_path, final_img)
 
         # print("{} has {} regions, and {} combinations.".format(filename, region_num, len(assignments)))
+        # if save_pic == True:
+        #     # with PdfPages(save_path) as pdf:
+        #     fig=plt.figure(figsize=(10, 3))
+        #     fig.add_subplot(1, 3, 1)
+        #     plt.imshow(img_ori)
+        #     plt.title("Input image")
+        #     plt.axis('off')
+        #     fig.add_subplot(1, 3, 2)
+        #     plt.imshow(mask_c)
+        #     plt.title("Ground-truth")
+        #     plt.axis('off')
+        #     fig.add_subplot(1, 3, 3)
+        #     plt.imshow(pred_c1)
+        #     plt.title("Prediction")
+        #     plt.axis('off')
+        #     # pdf.savefig()
+        #     plt.savefig(save_path)
+        #     plt.close()
 
-        if (ind+1) % 20 == 0:
-            print("Processing {}/{}".format(ind+1, len(dloader)))
-        if save_pic == True:
-            # with PdfPages(save_path) as pdf:
-            fig=plt.figure(figsize=(10, 3))
-            fig.add_subplot(1, 3, 1)
-            plt.imshow(img_ori)
-            plt.title("Input image")
-            plt.axis('off')
-            fig.add_subplot(1, 3, 2)
-            plt.imshow(mask_c)
-            plt.title("Ground-truth")
-            plt.axis('off')
-            fig.add_subplot(1, 3, 3)
-            plt.imshow(pred_c1)
-            plt.title("Prediction")
-            plt.axis('off')
-            # pdf.savefig()
-            plt.savefig(save_path)
-            plt.close()
-
-    avg_dice_single = metrics["dice_single"] / len(dloader)
-    avg_dice_overlap = metrics["dice_overlap"] / len(dloader)
+    # avg_dice_single = metrics["dice_single"] / len(dloader)
+    # avg_dice_overlap = metrics["dice_overlap"] / len(dloader)
+    # print("Average single chromosome dice ratio is: {}".format(avg_dice_single))
+    # print("Average overlap chromosome dice ratio is: {}".format(avg_dice_overlap))
 
     elapsed_time = time.time() - start_time
     print("Takes {} seconds on {} images".format(elapsed_time, len(dloader.dataset)))
-    print("Average single chromosome dice ratio is: {}".format(avg_dice_single))
-    print("Average overlap chromosome dice ratio is: {}".format(avg_dice_overlap))
 
 
 if  __name__ == '__main__':
