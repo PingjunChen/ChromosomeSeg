@@ -128,17 +128,17 @@ def save_all_karyotype_cnts(karyotype_dir):
     return all_chromosome_dict
 
 if __name__ == "__main__":
-    test_karyotype_dir = "../data/ChromosomeShape/test/"
+    test_karyotype_dir = "../data/OverlapSep/ChromosomeShape/test/"
     # extract_all_karyotypes(test_karyotype_dir)
-    train_karyotype_dir = "../data/ChromosomeShape/train/"
+    train_karyotype_dir = "../data/OverlapSep/ChromosomeShape/train/"
     # extract_all_karyotypes(train_karyotype_dir)
 
     # train_chromosome_dict = save_all_karyotype_cnts(train_karyotype_dir)
-    # train_chromosome_desp_path = "../data/ChromosomeShape/train/chromosome_train_feas.json"
+    # train_chromosome_desp_path = "../data/OverlapSep/ChromosomeShape/train/chromosome_train_feas.json"
     # with open(train_chromosome_desp_path, 'w') as outfile:
     #     json.dump(train_chromosome_dict, outfile)
 
     test_chromosome_dict = save_all_karyotype_cnts(test_karyotype_dir)
-    test_chromosome_desp_path = "../data/ChromosomeShape/test/chromosome_test_feas01.json"
+    test_chromosome_desp_path = "../data/OverlapSep/ChromosomeShape/test/chromosome_test_feas.json"
     with open(test_chromosome_desp_path, 'w') as outfile:
         json.dump(test_chromosome_dict, outfile)

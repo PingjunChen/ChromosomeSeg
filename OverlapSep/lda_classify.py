@@ -163,7 +163,8 @@ if __name__ == "__main__":
 		'ProjectMat': project_mat,
 		'ClassMean': class_mean}
 
-	with open('lda_model.pkl', "wb") as handle:
+	lda_model_path = os.path.join("../data/Models/LDA", "lda_model.pkl")
+	with open(lda_model_path, "wb") as handle:
 		pickle.dump(lda_model_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 	# # sample-by-sample prediction
