@@ -48,7 +48,7 @@ def test_model(model, dloader, save_pic=True):
     start_time = time.time()
 
     desc = ZernikeMoments(radius=21)
-    lda_paras = pickle.load(open(args.lda_model_path, "rb"))
+    lda_paras = pickle.load(open(os.path.join("../data/Models/LDA", args.lda_model_path), "rb"))
     def lda_pred(fea):
         testVector = np.matmul(fea, lda_paras['ProjectMat'])
         class_num = lda_paras['ClassMean'].shape[0]
@@ -68,8 +68,8 @@ def test_model(model, dloader, save_pic=True):
         mask = (mask[...,0] * 1 + mask[...,1] * 255).astype(np.uint8)
         mask_c = mask2color(mask)
 
-        inputs = inputs.to(device)
-        labels = labels.to(device)
+        inputs = inputs.cuda()
+        labels = labels.cuda()
         outputs = model(inputs)
         loss = calc_loss(outputs, labels, metrics)
 
@@ -106,7 +106,7 @@ def test_model(model, dloader, save_pic=True):
             plt.title("Ground-truth")
             plt.axis('off')
             fig.add_subplot(1, 3, 3)
-            plt.imshow(pred_c1)
+            plt.imshow(pred_c)
             plt.title("Prediction")
             plt.axis('off')
             plt.savefig(save_path)
