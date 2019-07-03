@@ -19,6 +19,7 @@ from utils import assign_combine
 from utils import ZernikeMoments, cal_assignment_fea
 from segnet import UNet
 
+
 def set_args():
     parser = argparse.ArgumentParser(description = 'Chromosome Overlap Segmentation')
     parser.add_argument("--batch_size",      type=int,   default=1,       help="batch size")
@@ -26,21 +27,11 @@ def set_args():
     parser.add_argument("--data_dir",        type=str,   default="../data")
     parser.add_argument("--model_name",      type=str,   default="unet-0.1283.pth")
     parser.add_argument("--lda_model_path",  type=str,   default="lda_model.pkl")
-    parser.add_argument("--gpu",             type=str,   default="2",     help="gpu id")
+    parser.add_argument("--gpu",             type=str,   default="5",     help="gpu id")
     parser.add_argument("--seed",            type=int,   default=1234,    help="seed")
 
     args = parser.parse_args()
     return args
-
-
-args = set_args()
-os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
-torch.manual_seed(args.seed)
-torch.cuda.manual_seed(args.seed)
-import torch.backends.cudnn as cudnn
-torch.backends.cudnn.deterministic=True
-cudnn.benchmark = True
-device = torch.device('cuda')
 
 
 def gen_test_dataloader():
@@ -126,26 +117,6 @@ def test_model(model, dloader, save_pic=False):
         cv2.drawContours(final_img, best_assign, 1, [0, 255, 0], 2)
         io.imsave(save_path, final_img)
 
-        # print("{} has {} regions, and {} combinations.".format(filename, region_num, len(assignments)))
-        # if save_pic == True:
-        #     # with PdfPages(save_path) as pdf:
-        #     fig=plt.figure(figsize=(10, 3))
-        #     fig.add_subplot(1, 3, 1)
-        #     plt.imshow(img_ori)
-        #     plt.title("Input image")
-        #     plt.axis('off')
-        #     fig.add_subplot(1, 3, 2)
-        #     plt.imshow(mask_c)
-        #     plt.title("Ground-truth")
-        #     plt.axis('off')
-        #     fig.add_subplot(1, 3, 3)
-        #     plt.imshow(pred_c1)
-        #     plt.title("Prediction")
-        #     plt.axis('off')
-        #     # pdf.savefig()
-        #     plt.savefig(save_path)
-        #     plt.close()
-
     # avg_dice_single = metrics["dice_single"] / len(dloader)
     # avg_dice_overlap = metrics["dice_overlap"] / len(dloader)
     # print("Average single chromosome dice ratio is: {}".format(avg_dice_single))
@@ -158,6 +129,13 @@ def test_model(model, dloader, save_pic=False):
 if  __name__ == '__main__':
     args = set_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    import torch.backends.cudnn as cudnn
+    torch.backends.cudnn.deterministic=True
+    cudnn.benchmark = True
+
     # load model
     model = UNet(n_class=args.class_num)
     model_path = os.path.join(args.data_dir, "Models/SegModels/AddUNet/s4", args.model_name)
